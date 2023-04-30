@@ -1,19 +1,23 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const dotenv = require("dotenv");
 const cors = require("cors");
 const userRouter = require("./routes/UserRoute");
+const authRouter = require("./routes/AuthRoute");
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+dotenv.config();
 
 app.use("/api", userRouter);
+app.use("/api", authRouter);
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/base")
+  .connect(process.env.DB_URL)
   .then(console.log("Database connected!"))
   .catch((err) => console.log(err));
 
-app.listen(5000, () => {
+app.listen(process.env.PORT, () => {
   console.log("Server is running!");
 });
