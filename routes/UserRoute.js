@@ -21,7 +21,7 @@ router.get("/users/:id", findUser);
 router.get("/users", verifyTokneAndUser, findAllUser);
 
 //Updating User
-router.put("/users/:id", updateUser);
+router.put("/users/:id", verifyTokneAndAdmin, updateUser);
 
 //Delete User
 router.delete("/users/:id", verifyTokneAndAdmin, deleteUser);

@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const User = require("../models/UserModel");
 
 //Login Controller
-const loginAuth = async (req, res) => {
+const loginAuth = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -29,12 +29,13 @@ const loginAuth = async (req, res) => {
       }
     }
   } catch (err) {
-    res.status(500).json({ error: err });
+    // res.status(500).json({ error: err });
+    next(err);
   }
 };
 
 //Register Controller
-const registerAuth = async (req, res) => {
+const registerAuth = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
 
@@ -71,7 +72,8 @@ const registerAuth = async (req, res) => {
       }
     }
   } catch (err) {
-    res.status(500).json({ error: err });
+    // res.status(500).json({ error: err });
+    next(err);
   }
 };
 

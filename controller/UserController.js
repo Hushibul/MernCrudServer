@@ -1,9 +1,9 @@
 const User = require("../models/UserModel");
 
-//Find User
-const findUser = async (req, res) => {
-  const { id } = req.params;
+//Find User By Id
+const findUser = async (req, res, next) => {
   try {
+    const { id } = req.params;
     const user = await User.findById(id);
     if (!user) {
       res.status(404).send("User not found");
@@ -11,46 +11,60 @@ const findUser = async (req, res) => {
     }
     res.send(user);
   } catch (error) {
-    res.status(500).send(error);
+    // res.status(500).send(error);
+    next(err);
   }
 };
 
 //Find All User
-const findAllUser = async (req, res) => {
+const findAllUser = async (req, res, next) => {
   try {
     const users = await User.find();
     res.status(200).json(users);
   } catch (err) {
-    res.status(500).json(err);
+    // res.status(500).json(err);
+    next(err);
   }
 };
 
 //Update User
-const updateUser = async (req, res) => {
-  const { id } = req.params;
-  const { username, email, password } = req.body;
-
+const updateUser = async (req, res, next) => {
   try {
+    const { id } = req.params;
+    const { username, email, password, isAdmin } = req.body;
+
     const user = await User.findOneAndUpdate(
       { _id: id },
-      { username, email, password },
+      { username, email, password, isAdmin },
       { new: true }
     );
-    res.status(203).json(user);
+
+    res.status(203).json({ success: true, user: { username, email, isAdmin } });
   } catch (err) {
-    res.status(304).json(err);
+    // res.status(304).json(err);
+    next(err);
   }
 };
 
-const deleteUser = async (req, res) => {
-  const { id } = req.params;
-
+//Delete User
+const deleteUser = async (req, res, next) => {
   try {
+    const { id } = req.params;
+
     const user = await User.findByIdAndDelete({ _id: id });
 
-    res.status(200).json(user.username + "Successfully deleted");
+    if (!user) {
+      res.status(404).json({ message: "User not found!" });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: `User successfully deleted`,
+      });
+    }
   } catch (err) {
-    res.status(500).json("Internal Server error");
+    // res.status(500).json("Internal Server error");
+    next(err);
   }
 };
+
 module.exports = { findUser, findAllUser, updateUser, deleteUser };
