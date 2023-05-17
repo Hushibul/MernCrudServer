@@ -1,4 +1,8 @@
 const User = require("../models/UserModel");
+const bcrypt = require("bcrypt");
+const upload = require("../middleware/multer");
+
+const path = require("path");
 
 //Find User By Id
 const findUser = async (req, res, next) => {
@@ -31,15 +35,15 @@ const findAllUser = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { username, email, password, isAdmin } = req.body;
+    const { isAdmin } = req.body;
 
     const user = await User.findOneAndUpdate(
       { _id: id },
-      { username, email, password, isAdmin },
+      { isAdmin },
       { new: true }
     );
 
-    res.status(203).json({ success: true, user: { username, email, isAdmin } });
+    res.status(203).json({ success: true, user: { isAdmin } });
   } catch (err) {
     // res.status(304).json(err);
     next(err);
@@ -67,4 +71,30 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-module.exports = { findUser, findAllUser, updateUser, deleteUser };
+//Edit Profile
+const editProfile = async (req, res, next) => {
+  try {
+    const url = req.protocol + "://" + req.get("host");
+    const { id } = req.params;
+    const { username, email } = req.body;
+
+    const avatar = req.file.filename;
+    console.log(avatar);
+
+    const avaterUrl = url + "/uploads/" + avatar;
+
+    const user = await User.findByIdAndUpdate(
+      {
+        _id: id,
+      },
+      { username, email, avatar: avaterUrl },
+      { new: true }
+    );
+
+    res.status(200).json({ success: true, message: "Profile Updated" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { findUser, findAllUser, updateUser, deleteUser, editProfile };

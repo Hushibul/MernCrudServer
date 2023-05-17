@@ -5,12 +5,14 @@ const {
   findAllUser,
   updateUser,
   deleteUser,
+  editProfile,
 } = require("../controller/UserController");
 
 const {
   verifyTokneAndUser,
   verifyTokneAndAdmin,
 } = require("../middleware/verifyTokens");
+const upload = require("../middleware/multer");
 
 const router = express.Router();
 
@@ -25,5 +27,13 @@ router.put("/users/:id", verifyTokneAndAdmin, updateUser);
 
 //Delete User
 router.delete("/users/:id", verifyTokneAndAdmin, deleteUser);
+
+//Edit Profile
+router.put(
+  "/profile/:id",
+  verifyTokneAndUser,
+  upload.single("avatar"),
+  editProfile
+);
 
 module.exports = router;
