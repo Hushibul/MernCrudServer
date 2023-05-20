@@ -20,7 +20,7 @@ const router = express.Router();
 router.get("/users/:id", findUser);
 
 //Get All User
-router.get("/users", verifyTokneAndUser, findAllUser);
+router.get("/users", verifyTokneAndAdmin, findAllUser);
 
 //Updating User
 router.put("/users/:id", verifyTokneAndAdmin, updateUser);

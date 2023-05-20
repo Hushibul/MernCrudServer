@@ -14,7 +14,7 @@ const findUser = async (req, res, next) => {
       return;
     }
     res.send(user);
-  } catch (error) {
+  } catch (err) {
     // res.status(500).send(error);
     next(err);
   }
@@ -23,8 +23,53 @@ const findUser = async (req, res, next) => {
 //Find All User
 const findAllUser = async (req, res, next) => {
   try {
-    const users = await User.find();
-    res.status(200).json(users);
+    const sortOrder = req.query.sortOrder;
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 5;
+
+    const totalUsers = await User.countDocuments();
+
+    const skip = (page - 1) * limit;
+
+    if (sortOrder === "asc") {
+      const users = await User.find()
+        .sort({ username: "1" })
+        .skip(skip)
+        .limit(limit);
+
+      res.status(200).json({
+        totalUsers,
+        currentPage: page,
+        totalPage: Math.ceil(totalUsers / limit),
+        users,
+      });
+    } else if (sortOrder === "desc") {
+      const users = await User.find()
+        .sort({ username: "-1" })
+        .skip(skip)
+        .limit(limit);
+
+      res.status(200).json({
+        totalUsers,
+        currentPage: page,
+        totalPage: Math.ceil(totalUsers / limit),
+        users,
+      });
+    } else {
+      const users = await User.find()
+        .sort({ updatedAt: "-1" })
+        .skip(skip)
+        .limit(limit);
+
+      res.status(200).json({
+        totalUsers,
+        currentPage: page,
+        totalPage: Math.ceil(totalUsers / limit),
+        users,
+      });
+
+      console.log(page, limit, skip);
+    }
   } catch (err) {
     // res.status(500).json(err);
     next(err);
@@ -97,4 +142,10 @@ const editProfile = async (req, res, next) => {
   }
 };
 
-module.exports = { findUser, findAllUser, updateUser, deleteUser, editProfile };
+module.exports = {
+  findUser,
+  findAllUser,
+  updateUser,
+  deleteUser,
+  editProfile,
+};

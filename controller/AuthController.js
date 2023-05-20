@@ -15,17 +15,28 @@ const loginAuth = async (req, res, next) => {
       const isMatched = await bcrypt.compare(password, user.password);
 
       if (!isMatched) {
-        res.status(304).json({ message: "Invalid user or password!" });
+        res.status(403).json({ message: "Invalid user or password!" });
       } else {
         // res.status(200).json("Ok");
         const token = jwt.sign(
-          { _id: user._id, username: user.username, isAdmin: user.isAdmin },
+          {
+            _id: user._id,
+            username: user.username,
+            isAdmin: user.isAdmin,
+          },
           process.env.JWT_SECRET,
           {
             expiresIn: "1d",
           }
         );
-        res.status(200).json({ token: token, username: user.username });
+        res.status(200).json({
+          token: token,
+          user: {
+            username: user.username,
+            email: user.email,
+            avatar: user.avatar,
+          },
+        });
       }
     }
   } catch (err) {
