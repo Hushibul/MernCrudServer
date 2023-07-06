@@ -1,8 +1,6 @@
 const User = require("../models/UserModel");
-const bcrypt = require("bcrypt");
-const upload = require("../middleware/multer");
 
-const path = require("path");
+const { deleteFileOnError } = require("../utils/utils");
 
 //Find User By Id
 const findUser = async (req, res, next) => {
@@ -111,7 +109,6 @@ const deleteUser = async (req, res, next) => {
       });
     }
   } catch (err) {
-    // res.status(500).json("Internal Server error");
     next(err);
   }
 };
@@ -121,22 +118,60 @@ const editProfile = async (req, res, next) => {
   try {
     const url = req.protocol + "://" + req.get("host");
     const { id } = req.params;
-    const { username, email } = req.body;
 
-    const avatar = req.file.filename;
-    console.log(avatar);
+    const existingUser = await User.findById(id);
 
-    const avaterUrl = url + "/uploads/" + avatar;
+    if (!existingUser) {
+      res.status(404).json({ success: false, message: "User not found!" });
+    } else {
+      const { username, email } = req.body;
 
-    const user = await User.findByIdAndUpdate(
-      {
-        _id: id,
-      },
-      { username, email, avatar: avaterUrl },
-      { new: true }
-    );
+      const updatedAvatarFile = req?.file?.filename;
+      const updatedAvatarFileUrl = url + "/uploads/" + updatedAvatarFile;
 
-    res.status(200).json({ success: true, message: "Profile Updated" });
+      if (updatedAvatarFile) {
+        const existingAvatarFileUrl = existingUser.avatar;
+        const actualAvatarFilePath =
+          "../uploads/" + existingAvatarFileUrl.split("uploads")[1];
+
+        deleteFileOnError(actualAvatarFilePath);
+
+        const user = await User.findOneAndUpdate(
+          {
+            _id: id,
+          },
+          {
+            username,
+            email,
+            avatar: updatedAvatarFileUrl,
+          },
+          { new: true }
+        );
+
+        res.status(200).json({
+          success: true,
+          message: "Profile Update Successfully!",
+          user,
+        });
+      } else {
+        const user = await User.findOneAndUpdate(
+          {
+            _id: id,
+          },
+          {
+            username,
+            email,
+          },
+          { new: true }
+        );
+
+        res.status(200).json({
+          success: true,
+          message: "Profile Update Successfully!",
+          user,
+        });
+      }
+    }
   } catch (err) {
     next(err);
   }
