@@ -1,4 +1,8 @@
 const User = require("../models/UserModel");
+const bcrypt = require("bcrypt");
+const upload = require("../middleware/multer");
+
+const path = require("path");
 
 //Find User By Id
 const findUser = async (req, res, next) => {
@@ -107,7 +111,6 @@ const deleteUser = async (req, res, next) => {
       });
     }
   } catch (err) {
-    // res.status(500).json("Internal Server error");
     next(err);
   }
 };
@@ -116,19 +119,34 @@ const deleteUser = async (req, res, next) => {
 const editProfile = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { username, email } = req.body;
+
+    const existingUser = await User.findById(id);
+
+    if (!existingUser) {
+      res.status(404).json({ success: false, message: "User not found!" });
+    } else {
+      const { username, email } = req.body;
 
     const avatar = req.file.filename;
+    console.log(avatar);
+
+    const avaterUrl = url + "/uploads/" + avatar;
 
     const user = await User.findByIdAndUpdate(
       {
         _id: id,
       },
-      { username, email, avatar: avatar },
+      { username, email, avatar: avaterUrl },
       { new: true }
     );
 
-    res.status(200).json({ success: true, message: "Profile Updated" });
+        res.status(200).json({
+          success: true,
+          message: "Profile Update Successfully!",
+          user,
+        });
+      }
+    }
   } catch (err) {
     next(err);
   }
