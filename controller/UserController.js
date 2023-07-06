@@ -1,8 +1,4 @@
 const User = require("../models/UserModel");
-const bcrypt = require("bcrypt");
-const upload = require("../middleware/multer");
-
-const path = require("path");
 
 //Find User By Id
 const findUser = async (req, res, next) => {
@@ -119,20 +115,16 @@ const deleteUser = async (req, res, next) => {
 //Edit Profile
 const editProfile = async (req, res, next) => {
   try {
-    const url = req.protocol + "://" + req.get("host");
     const { id } = req.params;
     const { username, email } = req.body;
 
     const avatar = req.file.filename;
-    console.log(avatar);
-
-    const avaterUrl = url + "/uploads/" + avatar;
 
     const user = await User.findByIdAndUpdate(
       {
         _id: id,
       },
-      { username, email, avatar: avaterUrl },
+      { username, email, avatar: avatar },
       { new: true }
     );
 
