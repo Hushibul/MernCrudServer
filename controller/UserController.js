@@ -1,6 +1,8 @@
 const User = require("../models/UserModel");
+const bcrypt = require("bcrypt");
+const upload = require("../middleware/multer");
 
-const { deleteFileOnError } = require("../utils/utils");
+const path = require("path");
 
 //Find User By Id
 const findUser = async (req, res, next) => {
@@ -116,7 +118,6 @@ const deleteUser = async (req, res, next) => {
 //Edit Profile
 const editProfile = async (req, res, next) => {
   try {
-    const url = req.protocol + "://" + req.get("host");
     const { id } = req.params;
 
     const existingUser = await User.findById(id);
@@ -126,44 +127,18 @@ const editProfile = async (req, res, next) => {
     } else {
       const { username, email } = req.body;
 
-      const updatedAvatarFile = req?.file?.filename;
-      const updatedAvatarFileUrl = url + "/uploads/" + updatedAvatarFile;
+    const avatar = req.file.filename;
+    console.log(avatar);
 
-      if (updatedAvatarFile) {
-        const existingAvatarFileUrl = existingUser.avatar;
-        const actualAvatarFilePath =
-          "../uploads/" + existingAvatarFileUrl.split("uploads")[1];
+    const avaterUrl = url + "/uploads/" + avatar;
 
-        deleteFileOnError(actualAvatarFilePath);
-
-        const user = await User.findOneAndUpdate(
-          {
-            _id: id,
-          },
-          {
-            username,
-            email,
-            avatar: updatedAvatarFileUrl,
-          },
-          { new: true }
-        );
-
-        res.status(200).json({
-          success: true,
-          message: "Profile Update Successfully!",
-          user,
-        });
-      } else {
-        const user = await User.findOneAndUpdate(
-          {
-            _id: id,
-          },
-          {
-            username,
-            email,
-          },
-          { new: true }
-        );
+    const user = await User.findByIdAndUpdate(
+      {
+        _id: id,
+      },
+      { username, email, avatar: avaterUrl },
+      { new: true }
+    );
 
         res.status(200).json({
           success: true,

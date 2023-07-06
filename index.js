@@ -17,6 +17,8 @@ app.use("/api", userRouter);
 app.use("/api", authRouter);
 app.use("/api", productRoute);
 
+app.use(express.static("uploads"));
+
 //DB Connection
 mongoose
   .connect(process.env.DB_URL)
@@ -25,7 +27,7 @@ mongoose
 
 //Server Start
 app.listen(process.env.PORT, () => {
-  console.log("Server is running!");
+  console.log(`Server is running at port ${process.env.PORT}`);
 });
 
 //Error Middleware
