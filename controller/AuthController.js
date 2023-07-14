@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const passport = require("passport");
+
 const User = require("../models/UserModel");
 
 //Login Controller
@@ -40,7 +42,6 @@ const loginAuth = async (req, res, next) => {
       }
     }
   } catch (err) {
-    // res.status(500).json({ error: err });
     next(err);
   }
 };
@@ -83,9 +84,19 @@ const registerAuth = async (req, res, next) => {
       }
     }
   } catch (err) {
-    // res.status(500).json({ error: err });
     next(err);
   }
 };
 
-module.exports = { loginAuth, registerAuth };
+const googleAthenticate = () => {
+  passport.authenticate("google", { scope: ["profile", "email"] });
+};
+
+const googleCallback = () => {
+  passport.authenticate("google", { failureRedirect: "/login" }),
+    function (req, res) {
+      res.redirect("/success");
+    };
+};
+
+module.exports = { loginAuth, registerAuth, googleAthenticate, googleCallback };
