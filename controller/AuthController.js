@@ -88,15 +88,23 @@ const registerAuth = async (req, res, next) => {
   }
 };
 
-const googleAthenticate = () => {
-  passport.authenticate("google", { scope: ["profile", "email"] });
+const googleAuthenticate = passport.authenticate("google", {
+  scope: ["profile", "email"],
+});
+
+const googleSuccessRedirect = (req, res) => {
+  // Successful authentication, redirect home.
+  res.redirect("/success");
 };
 
-const googleCallback = () => {
-  passport.authenticate("google", { failureRedirect: "/login" }),
-    function (req, res) {
-      res.redirect("/success");
-    };
-};
+const googleCallback = passport.authenticate("google", {
+  failureRedirect: "/login",
+});
 
-module.exports = { loginAuth, registerAuth, googleAthenticate, googleCallback };
+module.exports = {
+  loginAuth,
+  registerAuth,
+  googleAuthenticate,
+  googleSuccessRedirect,
+  googleCallback,
+};
